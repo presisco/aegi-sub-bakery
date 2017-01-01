@@ -20,11 +20,10 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 include("utils.lua")
 include("unicode.lua")
 
-filter_style_layer_version="1.00"
+filter_style_layer_version="1.01"
 
 function filter_style_layer(subtitle,result_table)
 	if subtitle.class ~= "dialogue" 
-		or subtitle.comment
 	then
 		return false
 	end
