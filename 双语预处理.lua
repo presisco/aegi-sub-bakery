@@ -16,26 +16,16 @@ NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FO
 OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN 
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ]]
+require "filter-style-layer"
 
 local tr = aegisub.gettext
 
 script_name = tr"双语预处理"
 script_description = tr"对纯英文字幕进行双语字体处理"
 script_author = "presisco"
-script_version = "1.00"
+script_version = "1.10"
 script_modified = "1 January 2017"
 line_end = "\\N"
-
-dialog_config = {
-	{class="label",label="翻译的效果",x=0,y=0,width=20,height=1},
-	{class="textbox",name="trans_prefix",hint="tags",x=0,y=1,width=20,height=3},
-	{class="label",label="原文的效果",x=0,y=4,width=20,height=1},
-	{class="textbox",name="src_prefix",hint="tags",x=0,y=5,width=20,height=3},
-	{class="label",label="限定处理的风格，无则为空",x=0,y=8,width=20,height=1},
-	{class="textbox",name="restrict_style",hint="style name",x=0,y=9,width=20,height=1},
-	{class="label",label="限定处理的图层，无则为-1",x=0,y=11,width=20,height=1},
-	{class="intedit",name="restrict_layer",hint="style name",x=0,y=12,width=4,height=1}
-}
 
 function add_prefix(subtitle,trans_tags,src_tags)
 	ntext = trans_tags .. line_end .. src_tags .. subtitle.text
@@ -44,52 +34,32 @@ function add_prefix(subtitle,trans_tags,src_tags)
 	return nline
 end
 
-function filter(subtitle,style,layer)
-	if subtitle.class ~= "dialogue" 
-		or subtitle.comment 
-		or subtitle.text == "" 
-	then
-		return false
-	end
-	if(style ~= "")
-	then
-		if(style ~= subtitle.style)
-		then
-			return false
-		end
-	end
-	if(layer ~= -1)
-	then
-		if(layer~=subtitle.layer)
-		then
-			return false
-		end
-	end
-	return true
-end
-
-function bilingual_bake(subtitles,style,layer,trans_tags,src_tags)
+function bilingual_bake(subtitles,result)
 	for i = 1, #subtitles
 	do
 		aegisub.progress.set(i * 100 / #subtitles)
-		if filter(subtitles[i],style,layer)
+		if filter_style_layer(subtitles[i],result)
 		then
-			subtitles[i] = add_prefix(subtitles[i],trans_tags,src_tags)
+			subtitles[i] = add_prefix(subtitles[i],result.trans_prefix,result.src_prefix)
 		end
 	end
 end
 
 function bilingual_bake_macro(subtitles, selected_lines, active_line)
+	available_styles=get_available_style_names(subtitles)
+	local dialog_config = {
+		{class="label",label="翻译的效果",x=0,y=0,width=20,height=1},
+		{class="textbox",name="trans_prefix",hint="tags",x=0,y=1,width=20,height=3},
+		{class="label",label="原文的效果",x=0,y=4,width=20,height=1},
+		{class="textbox",name="src_prefix",hint="tags",x=0,y=5,width=20,height=3}
+	}
+	merge_dialog_config(dialog_config,get_filter_style_layer_ui_vertical(available_styles,0,8))
 	clicked,result = aegisub.dialog.display(dialog_config,
 										{"Apply","Cancel"},
 										{["ok"]="Apply", ["cancel"]="Cancel"})
 	if clicked
 	then
-		bilingual_bake(subtitles,
-						result.restrict_style,
-						result.restrict_layer,
-						result.trans_prefix,
-						result.src_prefix)
+		bilingual_bake(subtitles,result)
 		aegisub.set_undo_point(script_name)
 	end
 end

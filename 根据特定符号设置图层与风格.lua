@@ -16,24 +16,16 @@ NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FO
 OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN 
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ]]
+require "filter-style-layer"
 
 local tr = aegisub.gettext
 
 script_name = tr"根据特定符号设置图层与风格"
 script_description = tr"根据特定符号设置图层与风格（比如歌词）"
 script_author = "presisco"
-script_version = "1.00"
+script_version = "1.10"
 script_modified = "1 January 2017"
 line_end = "\\N"
-
-dialog_config = {
-	{class="label",label="修改后的风格，不变动则为空",x=0,y=0,width=20,height=1},
-	{class="textbox",name="new_style",hint="tags",x=0,y=1,width=20,height=1},
-	{class="label",label="修改后的图层，不变动则为-1",x=0,y=2,width=20,height=1},
-	{class="intedit",name="new_layer",hint="style name",x=0,y=3,width=4,height=1},
-	{class="label",label="查找的特定符号",x=0,y=4,width=20,height=1},
-	{class="textbox",name="restrict_letter",hint="style name",x=0,y=5,width=20,height=1}
-}
 
 function change_prop(subtitle,style,layer)
 	local nline = subtitle
@@ -69,6 +61,17 @@ function change_style_layer(subtitles,style,layer,restrict_letter)
 end
 
 function change_style_layer_macro(subtitles, selected_lines, active_line)
+	available_styles=get_available_style_names(subtitles)
+
+	local dialog_config = {
+		{class="label",label="修改后的风格，不变动则为空",x=0,y=0,width=20,height=1},
+		{class="dropdown",name="new_style",hint="style name",items=available_styles,value=available_styles[0],x=0,y=1,width=8,height=1},
+		{class="label",label="修改后的图层，不变动则为-1",x=0,y=2,width=20,height=1},
+		{class="intedit",name="new_layer",hint="style name",x=0,y=3,width=4,height=1},
+		{class="label",label="查找的特定符号",x=0,y=4,width=20,height=1},
+		{class="textbox",name="restrict_letter",hint="style name",x=0,y=5,width=20,height=1}
+	}
+
 	clicked,result = aegisub.dialog.display(dialog_config,
 										{"Apply","Cancel"},
 										{["ok"]="Apply", ["cancel"]="Cancel"})
