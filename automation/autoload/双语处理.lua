@@ -16,10 +16,7 @@ NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FO
 OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN 
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ]]
-require "bakery-filter-style-layer"
-require "bakery-basic-ui"
-require "bakery-utils"
-require "bakery-locale"
+require "bakery"
 unicode = require 'aegisub.unicode'
 
 local tr = aegisub.gettext
@@ -152,61 +149,75 @@ function left_overs(subtitle,top_text,bottom_text,result)
 	return new_line
 end
 
-function scan_subs(result)
-	for i = 1, #subs
-	do
-		aegisub.progress.set(i * 100 / #subs)
-		if bakery_filter_style_layer(subs[i],result)
-		then
-			last_pos=find_last_pos(subs[i].text,bakery_get_language_judger_by_name(result.top_language))
-			top_text,bottom_text=reassgin_line(subs[i].text,last_pos,result.linebreaker)
-			subs[i] = left_overs(subs[i],top_text,bottom_text,result)
-		end
-	end
-end
-
-function on_ok(result)
-	aegisub.log("picked language:"..result.top_language.."\n")
-	aegisub.log("linebreaker:"..result.linebreaker.."\n")
-	scan_subs(result)
-	aegisub.set_undo_point(script_name)
-end
-
-function on_cancel(result)
-	aegisub.cancel()
+function scan_subs(sub,result)
+	last_pos=find_last_pos(sub.text,bakery_get_language_judger_by_name(result.top_language))
+	top_text,bottom_text=reassgin_line(sub.text,last_pos,result.linebreaker)
+	return left_overs(sub,top_text,bottom_text,result)
 end
 
 function entry()
 	available_styles=bakery_get_available_style_names(subs)
 	available_languages=bakery_get_language_names()
 	
-	local dialog_config = {
-		{class="label",label="上层要添加的标签",width=10,height=1},
-		{class="textbox",name="top_tags",hint="tags",width=10,height=3},
-		{class="label",label="下层要添加的标签",width=10,height=1},
-		{class="textbox",name="bottom_tags",hint="tags",width=10,height=3},
-		{class="label",label="上层原先的主要语言",width=8,height=1},
-		{class="dropdown",name="top_language",hint="language",items=available_languages,value=available_languages[1],width=8,height=1},
-		{class="label",label="换行符",width=4,height=1},
-		{class="textbox",name="linebreaker",hint="characters",value="\\N",width=8,height=1},
-		{class="checkbox",label="更改风格",name="alter_style",width=4,height=1},
-		{class="dropdown",name="new_style",hint="style name",items=available_styles,value=available_styles[1],width=8,height=1},
-		{class="checkbox",label="更改图层",name="alter_layer",width=5,height=1},
-		{class="intedit",name="new_layer",hint="layer id",width=2,height=1,min=0},
-		{class="checkbox",label="丢弃翻译的标签",name="drop_top_tags",width=8,height=1},
-		{class="checkbox",label="丢弃原文的标签",name="drop_bottom_tags",width=8,height=1},
-		{class="checkbox",label="交换输出行",name="switch_lines",width=5,height=1},
-		{class="checkbox",label="空行添加标签和换行",name="cook_empty",value=true,width=10,height=1}
+	local final_config={}
+	
+	local config_1 = {
+		class="layout",
+		orientation="vertical",
+		items={
+			{class="label",label="上层要添加的标签",width=6,height=1},
+			{class="textbox",name="top_tags",hint="tags",width=6,height=3},
+			{class="label",label="下层要添加的标签",width=6,height=1},
+			{class="textbox",name="bottom_tags",hint="tags",width=6,height=3},
+			{class="label",label="上层原先的主要语言",width=6,height=1},
+			{class="dropdown",name="top_language",hint="language",items=available_languages,value=available_languages[1],width=5,height=1},
+			{class="label",label="换行符",width=6,height=1},
+			{class="textbox",name="linebreaker",hint="characters",value="\\N",width=6,height=1}
+		}
 	}
 	
-	bakery_compute_layout_vertical(dialog_config,0,0)
+	local config_2 = {
+		class="layout",
+		orientation="vertical",
+		items={
+			{class="layout",
+			orientation="horizontal",
+			items={
+				{class="checkbox",label="更改风格",name="alter_style",width=1,height=1},
+				{class="dropdown",name="new_style",hint="style name",items=available_styles,value=available_styles[1],width=1,height=1}
+				}
+			},
+			{class="layout",
+			orientation="horizontal",
+			items={
+				{class="checkbox",label="更改图层",name="alter_layer",width=1,height=1},
+				{class="intedit",name="new_layer",hint="layer id",width=1,height=1,min=0}
+				}
+			},
+			{class="checkbox",label="丢弃翻译的标签",name="drop_top_tags",width=1,height=1},
+			{class="checkbox",label="丢弃原文的标签",name="drop_bottom_tags",width=1,height=1},
+			{class="checkbox",label="交换输出行",name="switch_lines",width=1,height=1},
+			{class="checkbox",label="空行添加标签和换行",name="cook_empty",value=true,width=1,height=1}
+		}
+	}
 	
-	bakery_merge_table(dialog_config
-			,bakery_get_filter_style_layer_ui_vertical(available_styles,0
-				,bakery_get_total_height(dialog_config)))
-			
-	bakery_simple_dialog_ok_cancel(dialog_config,on_ok,on_cancel)
+	local config_3 = {
+		class="layout",
+		orientation="horizontal",
+		items={config_1,config_2}
+	}
 	
+	bakery_simple_dialog_with_filter(config_3
+		,{
+			filter_style=true,
+			filter_layer=true,
+			filter_time=true,
+			filter_selection=true,
+			selection=selections,
+			subtitles=subs,
+			effective_sub=scan_subs,
+			on_cancel=function(result)	aegisub.cancel() end
+		})
 end
 
 function bilingual_cook_macro(subtitles, selected_lines, active_line)
@@ -214,6 +225,7 @@ function bilingual_cook_macro(subtitles, selected_lines, active_line)
 	selections=selected_lines
 	active=active_line
 	entry()
+	aegisub.set_undo_point(script_name)
 end
 
 function bilingual_cook_filter(subtitles, config)

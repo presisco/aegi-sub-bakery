@@ -23,6 +23,11 @@ bakery_utils_version="1.00"
 bakery_raw_line_seperator=","
 bakery_raw_line_classname_tail=": "
 
+function bakery_get_millis_from_text(text_time)
+	local millis=0
+	millis=tonumber(text_time:sub(1))
+end
+
 function bakery_number_in_close_intervals(number,intervals)
 	local i = 1
 	local in_intervals = false
@@ -43,6 +48,7 @@ function bakery_log_table_itr(content_table,prefix)
 	do
 		if type(content_table[k]) == "table"
 		then
+			aegisub.log(prefix.."  "..k..":\n")
 			bakery_log_table_itr(content_table[k],prefix.."  ")
 		elseif type(content_table[k]) == "boolean"
 		then

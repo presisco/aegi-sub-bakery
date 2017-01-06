@@ -16,50 +16,47 @@ NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FO
 OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN 
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ]]
-require "filter-style-layer"
+require "bakery-basic-ui"
+require "bakery-utils"
 
 local tr = aegisub.gettext
 
-script_name = tr"追加头部标签"
-script_description = tr"对字幕追加头部标签"
+script_name = tr"追加头部内容"
+script_description = tr"对字幕追加头部内容"
 script_author = "presisco"
-script_version = "1.10"
-script_modified = "1 January 2017"
+script_version = "1.20"
+script_modified = "6 January 2017"
 line_end = "\\N"
 
-function cook_text(subtitle,tags)
-	ntext = tags .. subtitle.text
-	local nline = subtitle
-	nline.text = ntext
-	return nline
-end
-
-function add_prefix(subtitles,result)
-	for i = 1, #subtitles
-	do
-		aegisub.progress.set(i * 100 / #subtitles)
-		if filter_style_layer(subtitles[i],result)
-		then
-			subtitles[i] = cook_text(subtitles[i],result.prefix)
-		end
-	end
+function cook_text(sub,result)
+	new_text = result.tags .. sub.text
+	local new_line = sub
+	new_line.text = new_text
+	return new_line
 end
 
 function add_prefix_macro(subtitles, selected_lines, active_line)
-	available_styles=get_available_style_names(subtitles)
 	local dialog_config = {
-		{class="label",label="添加的效果",x=0,y=0,width=20,height=1},
-		{class="textbox",name="prefix",hint="tags",x=0,y=1,width=20,height=3}
+		class="layout",
+		orientation="vertical",
+		items={
+			{class="label",label="添加的效果",x=0,y=0,width=20,height=1},
+			{class="textbox",name="prefix",hint="tags",x=0,y=1,width=20,height=3}
+		}
 	}
-	merge_dialog_config(dialog_config,get_filter_style_layer_ui_vertical(available_styles,0,4))
-	clicked,result = aegisub.dialog.display(dialog_config,
-										{"Apply","Cancel"},
-										{["ok"]="Apply", ["cancel"]="Cancel"})
-	if clicked
-	then
-		add_prefix(subtitles,result)
-		aegisub.set_undo_point(script_name)
-	end
+	bakery_simple_dialog_with_filter(dialog_config
+		,{
+			filter_style=true,
+			filter_layer=true,
+			filter_time=true,
+			filter_selection=true,
+			selection=selected_lines,
+			subtitles=subtitles,
+			effective_sub=cook_text,
+			on_cancel=function(result)	aegisub.cancel() end
+		})
+	
+	aegisub.set_undo_point(script_name)
 end
 
 function add_prefix_filter(subtitles, config)
