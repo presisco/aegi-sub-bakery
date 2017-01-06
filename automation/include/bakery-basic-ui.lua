@@ -215,7 +215,7 @@ function bakery_simple_dialog_with_filter(dialog_layout,function_config)
 										
 	if clicked
 	then
-		if function_config.selection_only
+		if function_config.filter_selection and result_table.restrict_selection
 		then
 			for i=1,#selection
 			do
