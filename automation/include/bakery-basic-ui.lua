@@ -1,4 +1,4 @@
-﻿--[[
+--[[
 Copyright (c) 2017 Presisco
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and 
@@ -56,7 +56,7 @@ function bakery_simple_dialog_with_filter(dialog_layout,function_config)
 		class="layout",
 		orientation="vertical",
 		items={
-			{class="checkbox",label="限定风格",name="restrict_style",width=1,height=1},
+			{class="checkbox",label="限定样式",name="restrict_style",width=1,height=1},
 			{class="dropdown",name="filter_style",hint="style name",items=style_names,value=style_names[1],width=1,height=1}
 		}
 	}
@@ -74,7 +74,7 @@ function bakery_simple_dialog_with_filter(dialog_layout,function_config)
 		class="layout",
 		orientation="vertical",
 		items={
-			{class="label",label="起始时间(h:m:s:ms)",width=2,height=1},
+			{class="label",label="开始时间(h:m:s:ms)",width=2,height=1},
 			{class="layout",
 			orientation="horizontal",
 			items={
@@ -108,7 +108,7 @@ function bakery_simple_dialog_with_filter(dialog_layout,function_config)
 		class="layout",
 		orientation="vertical",
 		items={
-			{class="checkbox",label="限定时间(格式与Aegisub相同)",name="restrict_time",width=2,height=1},
+			{class="checkbox",label="限制时间(格式与Aegisub相同)",name="restrict_time",width=2,height=1},
 			config_start_time,
 			config_end_time
 		}
@@ -118,7 +118,7 @@ function bakery_simple_dialog_with_filter(dialog_layout,function_config)
 		class="layout",
 		orientation="horizontal",
 		items={
-			{class="checkbox",label="限定选择的字幕",name="restrict_selection",width=2,height=1}
+			{class="checkbox",label="限定为选择项",name="restrict_selection",width=2,height=1}
 		}
 	}
 	

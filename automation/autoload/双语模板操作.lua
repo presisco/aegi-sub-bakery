@@ -1,4 +1,4 @@
-﻿--[[
+--[[
 Copyright (c) 2017 Presisco
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and 
@@ -16,7 +16,6 @@ NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FO
 OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN 
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ]]
-require "bakery-filter-style-layer"
 require "bakery-basic-ui"
 require "bakery-utils"
 
@@ -58,7 +57,6 @@ dialog_import_config={
 }
 
 function tpl_file_load(filename)
-then
 	local tpl_table={}
 	local tpl_file=io.open(filename,r)
 	

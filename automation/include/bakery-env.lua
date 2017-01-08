@@ -17,9 +17,7 @@ OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ]]
 
-include "bakery-utils.lua" 
-include "bakery-basic-ui.lua" 
-include "bakery-locale.lua" 
-include "bakery-env.lua"
-include "bakery-preference.lua"
-bakery_version="1.00"
+bakery_env_version="1.00"
+
+bakery_env_config_root="E:\\application\\Aegisub\\bakery\\"
+bakery_env_aegisub_root="E:\\application\\Aegisub"

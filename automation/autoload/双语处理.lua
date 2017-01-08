@@ -207,6 +207,8 @@ function entry()
 		items={config_1,config_2}
 	}
 	
+--	bakery_print_preferences_to_file(bakery_env_config_root.."layout.txt",config_3)
+	
 	bakery_simple_dialog_with_filter(config_3
 		,{
 			filter_style=true,

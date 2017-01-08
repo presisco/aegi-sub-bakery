@@ -1,4 +1,4 @@
-﻿--[[
+--[[
 Copyright (c) 2017 Presisco
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and 
@@ -21,8 +21,8 @@ require "bakery-utils"
 
 local tr = aegisub.gettext
 
-script_name = tr"追加头部内容"
-script_description = tr"对字幕追加头部内容"
+script_name = tr"在字幕头部添加内容"
+script_description = tr"在字幕头部添加内容"
 script_author = "presisco"
 script_version = "1.20"
 script_modified = "6 January 2017"
@@ -40,7 +40,7 @@ function add_prefix_macro(subtitles, selected_lines, active_line)
 		class="layout",
 		orientation="vertical",
 		items={
-			{class="label",label="添加的效果",x=0,y=0,width=20,height=1},
+			{class="label",label="待添加的内容",x=0,y=0,width=20,height=1},
 			{class="textbox",name="prefix",hint="tags",x=0,y=1,width=20,height=3}
 		}
 	}

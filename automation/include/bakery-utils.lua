@@ -1,4 +1,4 @@
-﻿--[[
+--[[
 Copyright (c) 2017 Presisco
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and 
@@ -28,6 +28,24 @@ function bakery_get_millis_from_text(text_time)
 	millis=tonumber(text_time:sub(1))
 end
 
+function bakery_text_to_boolean(text)
+	if text == "true"
+	then
+		return true
+	else
+		return false
+	end
+end
+
+function bakery_boolean_to_text(bool)
+	if bool
+	then
+		return "true"
+	else
+		return "false"
+	end
+end
+
 function bakery_number_in_close_intervals(number,intervals)
 	local i = 1
 	local in_intervals = false
@@ -46,20 +64,24 @@ function bakery_log_table_itr(content_table,prefix)
 	aegisub.log(prefix.."{\n")
 	for k,v in pairs(content_table)
 	do
+	  local key=nil
+	  
+	  if type(k)=="boolean"
+    then
+      key=bakery_boolean_to_text(k)
+    else
+      key=k
+    end
+	  
 		if type(content_table[k]) == "table"
 		then
-			aegisub.log(prefix.."  "..k..":\n")
+			aegisub.log(prefix.."  "..key..":\n")
 			bakery_log_table_itr(content_table[k],prefix.."  ")
 		elseif type(content_table[k]) == "boolean"
 		then
-			if content_table[k]
-			then
-				aegisub.log(prefix.."  "..k..":".."true".."\n")
-			else
-				aegisub.log(prefix.."  "..k..":".."false".."\n")
-			end
+		  aegisub.log(prefix.."  "..key..":"..bakery_boolean_to_text(content_table[k]).."\n")
 		else
-			aegisub.log(prefix.."  "..k..":"..v.."\n")
+			aegisub.log(prefix.."  "..key..":"..v.."\n")
 		end
 	end
 	aegisub.log(prefix.."}\n")

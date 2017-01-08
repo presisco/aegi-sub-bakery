@@ -1,4 +1,4 @@
-﻿--[[
+--[[
 Copyright (c) 2017 Presisco
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and 
@@ -20,7 +20,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 local tr = aegisub.gettext
 
 script_name = tr"预处理原始字幕"
-script_description = tr"对原始字幕进行预处理，以便于进行翻译"
+script_description = tr"将原始字幕进行加工"
 script_author = "presisco"
 script_version = "1.00"
 script_modified = "1 January 2017"
@@ -60,7 +60,7 @@ end
 function bake_raw_subs(subtitles)
 	local total=#subtitles
 	
-	aegisub.progress.task("清理无用文本")
+	aegisub.progress.task("娓呯悊鏃犵敤鏂囨湰")
 	for i=1,total
 	do
 		aegisub.progress.set(i * 100 / total)
@@ -74,7 +74,7 @@ function bake_raw_subs(subtitles)
 	end
 	
 	local i=1
-	aegisub.progress.task("清理空行")
+	aegisub.progress.task("娓呯悊绌鸿")
 	while(i <= total)
 	do
 		aegisub.progress.set(i * 100 / total)
