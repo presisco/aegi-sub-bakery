@@ -16,8 +16,7 @@ NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FO
 OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN 
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ]]
-require "bakery-basic-ui"
-require "bakery-utils"
+require "bakery"
 
 local tr = aegisub.gettext
 
@@ -73,11 +72,10 @@ function export(subtitles,selected_lines)
 	local tpl_sub=subtitles[selected_lines[0]]
 	local tpl_style=bakery_get_style_by_name(tpl_sub.style)
 	
-	bakery_set_control_value_by_name(dialog_export_config,"style",tpl_sub.style)
-	bakery_set_control_value_by_name(dialog_export_config,"layer",tpl_sub.layer)
-	bakery_set_control_value_by_name(dialog_export_config,"text",tpl_sub.text)
-	
-	result = bakery_simple_dialog_ok_quit(dialog_export_config)
+--	bakery.ui.set_value(dialog_export_config,"style",tpl_sub.style)
+--	bakery.ui.set_value(dialog_export_config,"layer",tpl_sub.layer)
+--	bakery.ui.set_value(dialog_export_config,"text",tpl_sub.text)
+--	result = bakery.ui.dialog.ok_cancel(dialog_export_config,on_ok,on_cancel)
 	
 	file_name = aegisub.dialog.save("保存模板", "template.tpl", "", wildcards, true)
 	if file_name == nil
@@ -92,14 +90,14 @@ function import(subtitles)
 end
 
 function entry(subtitles,selected_lines)
-	result = bakery_simple_dialog_ok_quit(dialog_mode)
+--[[	result = bakery.ui.dialog.ok_cancel(dialog_export_config,on_ok,on_cancel)
 	
 	if result.mode == "生成模板"
 	then
 		export(subtitles,selected_lines)
 	else
 		import()
-	end
+	end]]
 end
 
 function bilingual_tpl_macro(subtitles, selected_lines, active_line)

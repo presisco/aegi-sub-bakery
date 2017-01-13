@@ -16,7 +16,7 @@ NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FO
 OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN 
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ]]
-require "bakery"
+bakery=require "bakery"
 
 local tr = aegisub.gettext
 
@@ -46,7 +46,7 @@ function replace_by_style_layer_macro(subtitles, selected_lines, active_line)
 		}
 	}
 	
-	bakery_simple_dialog_with_filter(dialog_config
+	bakery.ui.dialog.with_filter(dialog_config
 		,{
 			filter_style=true,
 			filter_layer=true,

@@ -17,9 +17,26 @@ OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ]]
 
-include "bakery-utils.lua" 
-include "bakery-basic-ui.lua" 
-include "bakery-locale.lua" 
+include "bakery-utils.lua"
+include "bakery-dialog.lua"
+include "bakery-layout.lua"
+include "bakery-locale.lua"
 include "bakery-env.lua"
 include "bakery-preference.lua"
-bakery_version="1.00"
+bakery_version="1.10"
+
+local bakery={}
+
+bakery.env={
+    config_root=bakery_env_config_root,
+    aegisub_root=bakery_env_aegisub_root
+  }
+bakery.locale=bakery_locale
+bakery.preference=bakery_preference
+bakery.ui={
+    dialog=bakery_dialog,
+    layout=bakery_layout
+  }
+bakery.utils=bakery_utils
+
+return bakery

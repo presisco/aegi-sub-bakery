@@ -31,6 +31,19 @@ function install_bakery()
 	bakery_files = aegisub.dialog.open("选择bakery库文件", "bakery.lua", "", "", "lua files (.lua)", false, true)
 	aegisub_root = aegisub_root:gmatch("(.*)\\")
 	bakery_files = bakery_files:gmatch("(.*)\\")
+	success,err = lfs.mkdir(aegisub_root.."bakery")
+	if success == nil
+	then
+	   aegisub.log(err)
+	   aegisub.cancel()
+	end
+	
+	bakery_env_file = io:open(aegisub_root.."automation\\include\\bakery-env.lua","w")
+	bakery_env_file:write("bakery_env_config_root = "..aegisub_root.."bakery".."\n")
+	bakery_env_file:write("bakery_env_aegisub_root = "..aegisub_root.."\n")
+  bakery_env_file:flush()
+  bakery_env_file:close()
+  
 end
 
 function install_bakery_macro(subtitles, selected_lines, active_line)

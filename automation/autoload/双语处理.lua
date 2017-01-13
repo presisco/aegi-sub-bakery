@@ -16,7 +16,7 @@ NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FO
 OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN 
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ]]
-require "bakery"
+bakery=require "bakery"
 unicode = require 'aegisub.unicode'
 
 local tr = aegisub.gettext
@@ -24,8 +24,8 @@ local tr = aegisub.gettext
 script_name = tr"双语处理"
 script_description = tr"对字母进行双语处理（两行形式），目前只支持英语和非英语"
 script_author = "presisco"
-script_version = "2.00"
-script_modified = "1 January 2017"
+script_version = "2.20"
+script_modified = "12 January 2017"
 line_end = "\\N"
 left_brace = 123
 right_brace = 125
@@ -150,14 +150,18 @@ function left_overs(subtitle,top_text,bottom_text,result)
 end
 
 function scan_subs(sub,result)
-	last_pos=find_last_pos(sub.text,bakery_get_language_judger_by_name(result.top_language))
+  last_pos=1
+  if not result.cut_by_first_seperator
+  then
+    last_pos=find_last_pos(sub.text,bakery.locale.get_language_judger_by_name(result.top_language))
+	end
 	top_text,bottom_text=reassgin_line(sub.text,last_pos,result.linebreaker)
 	return left_overs(sub,top_text,bottom_text,result)
 end
 
 function entry()
-	available_styles=bakery_get_available_style_names(subs)
-	available_languages=bakery_get_language_names()
+	available_styles=bakery.utils.get_style_names(subs)
+	available_languages=bakery.locale.get_language_names()
 	
 	local final_config={}
 	
@@ -194,6 +198,7 @@ function entry()
 				{class="intedit",name="new_layer",hint="layer id",width=1,height=1,min=0}
 				}
 			},
+			{class="checkbox",label="第一个换行符区分翻译与原文",name="cut_by_first_seperator",width=1,height=1},
 			{class="checkbox",label="丢弃翻译的标签",name="drop_top_tags",width=1,height=1},
 			{class="checkbox",label="丢弃原文的标签",name="drop_bottom_tags",width=1,height=1},
 			{class="checkbox",label="交换输出行",name="switch_lines",width=1,height=1},
@@ -209,7 +214,7 @@ function entry()
 	
 --	bakery_print_preferences_to_file(bakery_env_config_root.."layout.txt",config_3)
 	
-	bakery_simple_dialog_with_filter(config_3
+	bakery.ui.dialog.with_filter(config_3
 		,{
 			filter_style=true,
 			filter_layer=true,
