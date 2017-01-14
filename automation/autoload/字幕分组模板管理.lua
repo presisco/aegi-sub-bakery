@@ -51,47 +51,26 @@ local tpl_sel_grid_layout_host={
     {class="label",label="勾选要删除的模板",width=4,height=1},
     {
       class="layout",
-      orientation="horizontal",
+	  type="grid",
+	  unit_width=5,
+	  unit_height=1,
+	  max_length=10,
+      orientation="vertical",
       items={}
     }
   }
 }
 
-function inflate_tpl_sel_grid(name_table)
-  
-end
-
 function del()
-  local max_column_length=10
   names=subtitle_group.get_tpl_names(group_tpl_table)
-
-  local container={}
-  local full_column_count=math.floor(#names/max_column_length)
-
-  for i=1,full_column_count
-  do
-    local full_column={class="layout",orientation="vertical",items={}}
-    local step=(i-1)*max_column_length
-
-    for j=1,max_column_length
-    do
-      local item={class="checkbox",name=names[step+j],label=names[step+j],width=4,height=1}
-      table.insert(full_column.items,item)
-    end
-
-    table.insert(container,full_column)
-  end
-
-  local remain_column={class="layout",orientation="vertical",items={}}
-  for i=#names-#names%max_column_length+1,#names
-  do
-    local item={class="checkbox",name=names[i],label=names[i],width=4,height=1}
-    table.insert(remain_column.items,item)
-  end
-
-  table.insert(container,remain_column)
+  local del_names={}
   
-  tpl_del_layout_host.items[2].items=container
+  for i=1,#names
+  do
+	local del_name={class="checkbox",name=names[i],label=names[i],width=5,height=1}
+	table.insert(del_names,del_name)
+  end
+  tpl_del_layout_host.items[2].items=del_names
 
   after_selection=function(result)
     for key,value in result
