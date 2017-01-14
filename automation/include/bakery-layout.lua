@@ -201,7 +201,8 @@ local compute_grid_layout_coordinate=function(grid_layout,offset_x,offset_y)
 
   local scanner=0
   local step=0
-
+  local ceil=0
+  
   while i < split_count
   do
     step=i*max_length
@@ -211,18 +212,38 @@ local compute_grid_layout_coordinate=function(grid_layout,offset_x,offset_y)
     else
       scanner=offset_y
     end
-
-    for j=1,max_length
+	
+	if i < split_count - 1
+	then
+	  ceil = max_length
+	else
+	  ceil = #items - i*max_length
+	end
+	
+    for j=1,ceil
     do
-      if orientation == "vertical"
-      then
-        items[step+j].x=offset_x
-        items[step+j].y=scanner
-        scanner=scanner+unit_height
-      else
-        items[step+j].x=scanner
-        items[step+j].y=offset_y
-        scanner=scanner+unit_width
+	  if items[step+j].class == "layout"
+	  then
+		if orientation == "vertical"
+		then
+		  bakery_layout.compute_layout_coordinate(items[step+j],offset_x,scanner)
+          scanner=scanner+unit_height
+        else
+		  bakery_layout.compute_layout_coordinate(items[step+j],scanner,offset_y)
+          scanner=scanner+unit_width
+		end
+	    
+	  else
+		if orientation == "vertical"
+		then
+		  items[step+j].x=offset_x
+          items[step+j].y=scanner
+          scanner=scanner+unit_height
+        else
+          items[step+j].x=scanner
+          items[step+j].y=offset_y
+          scanner=scanner+unit_width
+		end
       end
     end
 
@@ -235,6 +256,22 @@ local compute_grid_layout_coordinate=function(grid_layout,offset_x,offset_y)
     i=i+1
   end
   
+  if orientation == "vertical"
+  then
+	if #items < max_length
+	then
+	  return unit_width , #items * unit_height
+	else
+	  return split_count * unit_width , max_length * unit_height
+	end
+  else
+	if #items < max_length
+	then
+	  return #items * unit_width , unit_height
+	else
+	  return max_length * unit_width , split_count * unit_height
+	end
+  end
   
 end
 
