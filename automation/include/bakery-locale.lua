@@ -175,4 +175,70 @@ bakery_locale.detect_unicode_type=function (char)
   end
 end
 
+bakery_locale.bilingual_pivot=function(text,lan_name,reverse_pick)
+  local left_brace = "{"
+  local right_brace = "}"
+  local judger=bakery_locale.get_language_judger_by_name(lan_name)
+  
+  local reading_tags=false
+  local pivot=0
+  local i=0
+  local char_index=1
+  
+  local char_seq={}
+  for char in unicode.chars(text)
+  do
+    table.insert(char_seq,char)
+  end
+
+  if reverse_pick
+  then
+    char_index=#char_seq
+    i=text:len()
+    while char_index > 0
+    do
+      local char=char_seq[char_index]
+      local char_length=char:len()
+      i=i-char_length
+      if char == left_brace
+      then
+        reading_tags=true
+      elseif char == right_brace
+      then
+        reading_tags=false
+      elseif not reading_tags
+      then
+        if judger(char)
+        then
+          pivot=i
+        end
+      end
+      char_index = char_index - 1
+    end
+  else
+    while char_index <= #char_seq
+    do
+      local char=char_seq[char_index]
+      local char_length=char:len()
+      i=i+char_length
+      if char == left_brace
+      then
+        reading_tags=true
+      elseif char == right_brace
+      then
+        reading_tags=false
+      elseif not reading_tags
+      then
+        if judger(char)
+        then
+          pivot=i
+        end
+      end
+      char_index = char_index + 1
+    end
+  end
+
+  return pivot
+end
+
 return bakery_locale

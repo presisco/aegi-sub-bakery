@@ -29,7 +29,7 @@ script_name = tr"字幕分组模板管理"
 script_description = tr"对字幕分组模板进行管理"
 script_author = "presisco"
 script_version = "1.00"
-script_modified = "8 January 2017"
+script_modified = "15 January 2017"
 
 subs={}
 selections={}
@@ -39,6 +39,7 @@ export_config={}
 group_tpl_table={}
 group_tpl_config={}
 group_config={}
+sector_identifer=""
 modified=false
 quit_mod=false
 
@@ -51,10 +52,10 @@ local tpl_sel_grid_layout_host={
     {class="label",label="勾选要删除的模板",width=4,height=1},
     {
       class="layout",
-	  type="grid",
-	  unit_width=5,
-	  unit_height=1,
-	  max_length=10,
+      type="grid",
+      unit_width=6,
+      unit_height=1,
+      max_length=10,
       orientation="vertical",
       items={}
     }
@@ -67,22 +68,24 @@ function del()
   
   for i=1,#names
   do
-	local del_name={class="checkbox",name=names[i],label=names[i],width=5,height=1}
-	table.insert(del_names,del_name)
+    local del_name={class="checkbox",name=names[i],label=names[i],width=5,height=1}
+    table.insert(del_names,del_name)
   end
-  tpl_del_layout_host.items[2].items=del_names
+  
+  tpl_sel_grid_layout_host.items[2].items=del_names
 
   after_selection=function(result)
-    for key,value in result
+    for key,value in pairs(result)
     do
       if type(value) == "boolean" and value
       then
         group_tpl_table[key]=nil
+        modified=true
       end
     end
   end
 
-  bakery.ui.dialog.ok_cancel(tpl_del_layout_host,
+  bakery.ui.dialog.ok_cancel(tpl_sel_grid_layout_host,
     after_selection,
     back_to_main)
 end
@@ -113,15 +116,23 @@ local tpl_edit_layout={
       class="layout",
       orientation="horizontal",
       items={
-        {class="label",label="标签,使用\"*\"区分多个原文区段",width=2,height=1},
-        {class="textbox",name="tags",value="",width=12,height=6}
+        {class="label",label="添加的文本与标签\n使用*代表一个原文区段\n\\*为一个'*'",width=2,height=1},
+        {class="textbox",name="text",value="",width=12,height=6}
       }
     },
     {
       class="layout",
       orientation="horizontal",
       items={
-        {class="label",label="特效t)",width=2,height=1},
+        {class="label",label="角色",width=2,height=1},
+        {class="textbox",name="actor",value="",width=12,height=6}
+      }
+    },
+    {
+      class="layout",
+      orientation="horizontal",
+      items={
+        {class="label",label="特效",width=2,height=1},
         {class="textbox",name="effect",value="",width=12,height=4}
       }
     }
@@ -139,10 +150,11 @@ local tpl_list_layout={
 
 function edit_group_tpl(result)
   local new_group_tpl={
-    style=result.style,
+    style=bakery.utils.trim_illegal_char(result.style),
     layer=result.layer,
-    tags=result.tags,
-    effect=result.effect
+    text=bakery.utils.trim_illegal_char(result.text),
+    actor=bakery.utils.trim_illegal_char(result.actor),
+    effect=bakery.utils.trim_illegal_char(result.effect),
   }
   group_tpl_table[result.name]=new_group_tpl
   modified=true
@@ -151,7 +163,9 @@ end
 function update_edit_layout(tpl)
   bakery.ui.layout.get_control(tpl_edit_layout,"style").value=tpl.style
   bakery.ui.layout.get_control(tpl_edit_layout,"layer").value=tpl.layer
-  bakery.ui.layout.get_control(tpl_edit_layout,"tags").value=tpl.tags
+  bakery.ui.layout.get_control(tpl_edit_layout,"text").value=tpl.text
+  bakery.ui.layout.get_control(tpl_edit_layout,"actor").value=tpl.actor
+  bakery.ui.layout.get_control(tpl_edit_layout,"effect").value=tpl.effect
 end
 
 function edit()
@@ -349,7 +363,7 @@ function group_tpl()
   end
 end
 
-function group_tpl_macro(subtitles, selected_lines, active_line)
+function group_tpl_manager_macro(subtitles, selected_lines, active_line)
   subs=subtitles
   selections=selected_lines
   active=active_line
@@ -360,19 +374,20 @@ function group_tpl_macro(subtitles, selected_lines, active_line)
 
   group_tpl_config=subtitle_group.load_config()
   group_tpl_table=subtitle_group.load_tpl(group_tpl_config.current_tpl_file)
-
+  sector_identifer=subtitle_group.get_sector_identifer()
+  
   group_tpl()
 
   if modified
   then
-    subtitle_group.save_tpl(group_tpl_table)
+    subtitle_group.save_tpl(group_tpl_config.current_tpl_file,group_tpl_table)
   end
   quit_mod=false
   aegisub.set_undo_point(script_name)
 end
 
-function group_tpl_filter(subtitles, config)
+function group_tpl_manager_filter(subtitles, config)
 end
 
-aegisub.register_macro(script_name, script_description, group_tpl_macro)
-aegisub.register_filter(script_name, script_description, 0, group_tpl_filter)
+aegisub.register_macro(script_name, script_description, group_tpl_manager_macro)
+aegisub.register_filter(script_name, script_description, 0, group_tpl_manager_filter)

@@ -1,25 +1,66 @@
 --[[
 
 
+
+
+
+
+
 Copyright (c) 2017 Presisco
 
 
+
+
+
+
+
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and 
+
+
 associated documentation files (the "Software"), to deal in the Software without restriction, 
+
+
 including without limitation the rights to use, copy, modify, merge, publish, distribute, 
+
+
 sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is 
+
+
 furnished to do so, subject to the following conditions:
 
 
+
+
+
+
+
 The above copyright notice and this permission notice shall be included in all copies or substantial 
+
+
 portions of the Software.
 
 
+
+
+
+
+
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT 
+
+
 NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND 
+
+
 NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES 
+
+
 OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN 
+
+
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+
+
 
 ]]
 include("bakery-utils.lua")
@@ -28,31 +69,73 @@ bakery_layout_version="1.10"
 
 --[[
 
+
+
+
   layout:
+
+
+
 
   {
 
+
+
+
     class="layout"
+
+
+
 
     type="grid/linear"  if dont have type then it's as linear
 
+
+
+
     unit_width=(1)  for grid layout
+
+
+
 
     unit_height=(1) for grid layout
 
+
+
+
     max_length=(10) for grid layout,relative to orientation
+
+
+
 
     orientation="vertical" or "horizontal" in grid layout means column first or row first
 
+
+
+
     items={
+
+
+
 
       {...},
 
+
+
+
       {...}
+
+
+
 
     }
 
+
+
+
   }
+
+
+
 
 ]]
 
@@ -163,6 +246,17 @@ local compute_linear_layout_coordinate=function(linear_layout,offset_x,offset_y)
     else
       items[i].x=offset_x
       items[i].y=offset_y
+
+      if items[i].width == nil
+      then
+        items[i].width = 1
+      end
+
+      if items[i].height == nil
+      then
+        items[i].height = 1
+      end
+
       if orientation == "vertical"
       then
         offset_y=offset_y+items[i].height
@@ -202,7 +296,7 @@ local compute_grid_layout_coordinate=function(grid_layout,offset_x,offset_y)
   local scanner=0
   local step=0
   local ceil=0
-  
+
   while i < split_count
   do
     step=i*max_length
@@ -212,41 +306,40 @@ local compute_grid_layout_coordinate=function(grid_layout,offset_x,offset_y)
     else
       scanner=offset_y
     end
-	
-	if i < split_count - 1
-	then
-	  ceil = max_length
-	else
-	  ceil = #items - i*max_length
-	end
-	
+
+    if i < split_count - 1
+    then
+      ceil = max_length
+    else
+      ceil = #items - i*max_length
+    end
+
     for j=1,ceil
     do
-	  if items[step+j].class == "layout"
-	  then
-		if orientation == "vertical"
-		then
-		  bakery_layout.compute_layout_coordinate(items[step+j],offset_x,scanner)
+      if items[step+j].class == "layout"
+      then
+        if orientation == "vertical"
+        then
+          bakery_layout.compute_layout_coordinate(items[step+j],offset_x,scanner)
           scanner=scanner+unit_height
         else
-		  bakery_layout.compute_layout_coordinate(items[step+j],scanner,offset_y)
+          bakery_layout.compute_layout_coordinate(items[step+j],scanner,offset_y)
           scanner=scanner+unit_width
-		end
-	    
-	  else
-		if orientation == "vertical"
-		then
-		  items[step+j].x=offset_x
+        end
+      else
+        if orientation == "vertical"
+        then
+          items[step+j].x=offset_x
           items[step+j].y=scanner
           scanner=scanner+unit_height
         else
           items[step+j].x=scanner
           items[step+j].y=offset_y
           scanner=scanner+unit_width
-		end
+        end
       end
     end
-
+    
     if orientation == "vertical"
     then
       offset_x=offset_x+unit_width
@@ -255,24 +348,23 @@ local compute_grid_layout_coordinate=function(grid_layout,offset_x,offset_y)
     end
     i=i+1
   end
-  
+
   if orientation == "vertical"
   then
-	if #items < max_length
-	then
-	  return unit_width , #items * unit_height
-	else
-	  return split_count * unit_width , max_length * unit_height
-	end
+    if #items < max_length
+    then
+      return unit_width , #items * unit_height
+    else
+      return split_count * unit_width , max_length * unit_height
+    end
   else
-	if #items < max_length
-	then
-	  return #items * unit_width , unit_height
-	else
-	  return max_length * unit_width , split_count * unit_height
-	end
+    if #items < max_length
+    then
+      return #items * unit_width , unit_height
+    else
+      return max_length * unit_width , split_count * unit_height
+    end
   end
-  
 end
 
 bakery_layout.compute_layout_coordinate=function(layout,offset_x,offset_y)
@@ -281,7 +373,7 @@ bakery_layout.compute_layout_coordinate=function(layout,offset_x,offset_y)
     return
   end
 
-  if items[i].type == "linear" or items[i].type == nil
+  if layout.type == "linear" or layout.type == nil
   then
     return compute_linear_layout_coordinate(layout,offset_x,offset_y)
   else

@@ -257,7 +257,7 @@ end
 
 bakery_dialog.warning=function(text)
   aegisub.dialog.display(
-    {class="label",label=text,width=1,height=1},
+    {{class="label",label=text,width=1,height=1}},
     {"OK"},
     {["ok"]="OK"})
 end

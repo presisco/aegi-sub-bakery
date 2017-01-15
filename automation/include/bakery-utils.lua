@@ -37,6 +37,7 @@ local log_kv_seperator="="
 local illegal_ascii={0x00,0x1F}
 
 bakery_utils.trim_illegal_char=function(subtitle_text)
+  
   local trimed=""
   local raw_length=subtitle_text:len()
   local illegal_ascii_dec={tonumber(illegal_ascii[1]),tonumber(illegal_ascii[2])}

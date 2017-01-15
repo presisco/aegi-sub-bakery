@@ -38,6 +38,7 @@ config_table={
       style="",
       layer=0,
       tags="",
+      actor="",
       effects=""
     },
     ...
@@ -52,6 +53,7 @@ local tpl_classname="subtitle-group-template"
 local tpl_version="1.00"
 local types={"simple","bilingual"}
 local filetype="txt files (.txt)|.txt"
+local sector_identifer="*"
 
 local config_filepath=bakery.env.config_root.."group_config.txt"
 local default_tpl_filepath=bakery.env.config_root.."group_tpl.txt"
@@ -66,6 +68,10 @@ end
 
 subtitle_group.get_tpl_file_type=function()
   return filetype
+end
+
+subtitle_group.get_sector_identifer=function()
+  return sector_identifer
 end
 
 subtitle_group.load_config=function()
@@ -119,6 +125,40 @@ end
 
 subtitle_group.get_name_from_path=function(filepath)
   return filepath:gsub("(.*)\\","")
+end
+
+subtitle_group.parse_tpl_text=function(text)
+  local length=text:len()
+  local sectors={}
+  local buff=""
+  local i = 1
+  
+  while i <= length
+  do
+    local char=text:sub(i,i)
+    
+    if char == "\\"
+    then
+      if text:sub(i+1,i+1) == sector_identifer
+      then
+        buff=buff..sector_identifer
+        i=i+1
+      else
+        buff=buff..char
+      end
+    elseif char == sector_identifer
+    then
+      table.insert(sectors,buff)
+      buff = ""
+    else
+      buff=buff..char
+    end
+    i=i+1
+  end
+  
+  table.insert(sectors,buff)
+  
+  return sectors
 end
 
 return subtitle_group
