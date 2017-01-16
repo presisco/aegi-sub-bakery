@@ -36,6 +36,18 @@ local log_depth_blank="\t"
 local log_kv_seperator="="
 local illegal_ascii={0x00,0x1F}
 
+local log_line=function(text)
+  aegisub.log(text.."\n")
+end
+
+local log_err=function(text)
+  aegisub.log(1,text.."\n")
+end
+
+local log_dbg=function(text)
+  aegisub.log(4,text.."\n")
+end
+
 bakery_utils.uniq_insert=function(array_table,item)
   for key,value in pairs(array_table)
   do
@@ -112,6 +124,7 @@ bakery_utils.print_table_itr=function(output,depth,table)
   kv_sp=log_kv_seperator
   t_wrap=log_type_wrap
   get_blanks=function(depth)
+  bool2text=bakery_utils.bool2text
     return log_depth_blank:rep(depth)
   end
   for k,v in pairs(table)
@@ -137,7 +150,7 @@ bakery_utils.print_table_itr=function(output,depth,table)
       local value=nil
       if value_type == "boolean"
       then
-        value=bool2text
+        value=bool2text(v)
       elseif value_type == "string"
       then
         value=v:gsub("\n"," ")
@@ -145,8 +158,9 @@ bakery_utils.print_table_itr=function(output,depth,table)
       else
         value=v
       end
+
       output(get_blanks(depth)..t_wrap[key_type][1]..key..t_wrap[key_type][2]
-        ..kv_sp..t_wrap[key_type][1]..value..t_wrap[key_type][2].."\n")
+        ..kv_sp..t_wrap[value_type][1]..value..t_wrap[value_type][2].."\n")
     end
   end
 end
@@ -155,7 +169,7 @@ bakery_utils.read_table_itr=function(lines,index)
   local i=index
   kv_sp=log_kv_seperator
   t_wrap=log_type_wrap
-  text2bool=text2bool
+  text2bool=bakery_utils.text2bool
   local pref_table={}
   local force_break=false
   while i < #lines and not force_break
@@ -202,12 +216,12 @@ end
 bakery_utils.log_table=function(content_table)
   if type(content_table) ~= "table"
   then
-    aegisub.log("bakery.utils.log_table():".."wrong input type:"..type(content_table))
+    log_dbg("bakery.utils.log_table():".."wrong input type:"..type(content_table))
     return
   end
-  aegisub.log(log_type_wrap["table"][1])
-  bakery_utils.print_table_itr(aegisub.log,1,content_table)
-  aegisub.log(log_type_wrap["table"][2])
+  log_dbg(log_type_wrap["table"][1])
+  bakery_utils.print_table_itr(log_dbg,1,content_table)
+  log_dbg(log_type_wrap["table"][2])
 end
 
 bakery_utils.read_table=function(lines)

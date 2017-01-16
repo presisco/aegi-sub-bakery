@@ -80,7 +80,7 @@ local wrap_preference = function(pref_table,classname,version)
 end
 
 bakery_preference.read_from_file=function(filename,classname,default_version,default_pairs)
-  log_dbg("opening preference file:"..filename.."\n")
+  log_dbg("opening preference file:"..filename)
   pref_file,err_msg=io.open(filename,"r")
   if pref_file == nil
   then
@@ -92,7 +92,7 @@ bakery_preference.read_from_file=function(filename,classname,default_version,def
     end
     if pref_file == nil
     then
-      log_err("open failed:"..err_msg.."\n")
+      log_err("open failed:"..err_msg)
       return {},err_msg
     end
   end
@@ -104,7 +104,7 @@ bakery_preference.read_from_file=function(filename,classname,default_version,def
     table.insert(lines,line)
   end
 
-  log_dbg("total lines:"..#lines.."\n")
+  log_dbg("total lines:"..#lines)
 
   pref_file:close()
   
@@ -114,11 +114,11 @@ bakery_preference.read_from_file=function(filename,classname,default_version,def
 end
 
 bakery_preference.print_to_file=function(filename,pref_table,classname,version)
-  log_dbg("saving preference file:"..filename.."\n")
+  log_dbg("saving preference file:"..filename)
   pref_file,err_msg=io.open(filename,"w")
   if pref_file == nil
   then
-    log_err("save failed:"..err_msg.."\n")
+    log_err("save failed:"..err_msg)
     return err_msg
   end
 

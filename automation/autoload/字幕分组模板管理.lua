@@ -212,7 +212,12 @@ local tpl_add_layout={
 
 function generate()
   selected_sub=subs[selections[1]]
-  local tpl={style=selected_sub.style,layer=selected_sub.layer,tags=selected_sub.text}
+  local tpl={
+    style=selected_sub.style,
+    layer=selected_sub.layer,
+    text=selected_sub.text,
+    actor=selected_sub.actor,
+    effect=selected_sub.effect}
   update_edit_layout(tpl)
   bakery.ui.dialog.ok_cancel(tpl_add_layout,
     edit_group_tpl,

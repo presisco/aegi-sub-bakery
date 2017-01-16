@@ -40,6 +40,18 @@ bakery_layout_version="1.10"
 
 bakery_layout={}
 
+local log_line=function(text)
+  aegisub.log(text.."\n")
+end
+
+local log_err=function(text)
+  aegisub.log(1,text.."\n")
+end
+
+local log_dbg=function(text)
+  aegisub.log(4,text.."\n")
+end
+
 bakery_layout.get_control=function (layout,name)
   if layout.class ~= "layout"
   then
@@ -278,6 +290,34 @@ bakery_layout.compute_layout_coordinate=function(layout,offset_x,offset_y)
   else
     return compute_grid_layout_coordinate(layout,offset_x,offset_y)
   end
+end
+
+local set_items_value_itr=function(layout,table)
+  if layout.class ~= "layout"
+  then
+    return
+  end
+  local items=layout.items
+  for i=1,#items
+  do
+    if items[i].class == "layout"
+    then
+      bakery_layout.set_items_value(items[i],table)
+    elseif table[items[i].name] ~= nil
+    then
+      items[i].value=table[items[i].name]
+    end
+  end
+  
+end
+
+bakery_layout.set_items_value=function(layout,table)
+  if table == {}
+  then
+    log_dbg("empty items value table")
+    return
+  end
+  set_items_value_itr(layout,table)
 end
 
 return bakery_layout
