@@ -36,6 +36,25 @@ local log_depth_blank="\t"
 local log_kv_seperator="="
 local illegal_ascii={0x00,0x1F}
 
+bakery_utils.uniq_insert=function(array_table,item)
+  for key,value in pairs(array_table)
+  do
+    if value == item
+    then
+      return
+    end
+  end
+  table.insert(array_table,item)
+end
+
+bakery_utils.get_filename_from_path=function(filepath)
+  return filepath:gsub("(.*)\\","")
+end
+
+bakery_utils.get_full_path=function(filepath)
+  return filepath:match("(.*)\\").."\\"
+end
+
 bakery_utils.trim_illegal_char=function(subtitle_text)
   
   local trimed=""

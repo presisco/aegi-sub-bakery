@@ -49,13 +49,13 @@ local tpl_sel_grid_layout_host={
   class="layout",
   orientation="vertical",
   items={
-    {class="label",label="勾选要删除的模板",width=4,height=1},
+    {class="label",label="选择模板",width=4,height=1},
     {
       class="layout",
       type="grid",
       unit_width=6,
       unit_height=1,
-      max_length=10,
+      max_length=3,
       orientation="vertical",
       items={}
     }
@@ -65,14 +65,15 @@ local tpl_sel_grid_layout_host={
 function del()
   names=subtitle_group.get_tpl_names(group_tpl_table)
   local del_names={}
-  
+
   for i=1,#names
   do
     local del_name={class="checkbox",name=names[i],label=names[i],width=5,height=1}
     table.insert(del_names,del_name)
   end
-  
+
   tpl_sel_grid_layout_host.items[2].items=del_names
+  tpl_sel_grid_layout_host.items[1].label="勾选要删除的模板"
 
   after_selection=function(result)
     for key,value in pairs(result)
@@ -229,25 +230,122 @@ local tpl_file_op_ui={
   }
 }
 
+--[[
 local tpl_file_list={
   class="layout",
-  orientation="horizontal",
+  type="linear",
+  orientation="vertical",
   items={
-    {class="label",label="选择模板文件",width=4,height=1},
-    {class="dropdown",name="tpl_files",items={},value="",width=10,height=1}
+    {class="layout",
+      orientation="horizontal",
+      items={
+        {class="label",label="选择已知的模板文件",width=4,height=1},
+        {class="dropdown",name="tpl_files",items={},value="",width=10,height=1}}
+    },
+    {class="checkbox",name="add_tpl_file",label="添加模板文件",width=4,height=1}
   }
 }
+]]
 
-function swith_tpl_file(new_filepath)
+function swith_tpl_file_op(new_filepath)
   subtitle_group.save_tpl(group_tpl_config.current_tpl_file
     ,group_tpl_table)
 
   group_tpl_config.current_tpl_file=new_filepath
-  table.insert(group_tpl_config.known_tpl_files,new_filepath)
+  bakery.utils.uniq_insert(group_tpl_config.known_tpl_files,new_filepath)
 
   subtitle_group.save_config(group_tpl_config)
-  subtitle_group.save_tpl(group_tpl_config.current_tpl_file
-    ,{classname=subtitle_group.get_tpl_classname()})
+
+  group_tpl_table=subtitle_group.load_tpl(group_tpl_config.current_tpl_file)
+end
+
+function switch_tpl_file()
+  
+  local current_file=group_tpl_config.current_tpl_file
+  local name=bakery.utils.get_filename_from_path(current_file)
+  local path=bakery.utils.get_full_path(current_file)
+--  aegisub.log("name:"..name..",path:"..path.."\n")
+  
+  local switched_file= aegisub.dialog.open(
+    "选择导入的文件",
+    name,
+    path,
+    subtitle_group.get_tpl_file_type(),
+    false)
+  
+  if switched_file ~= nil
+  then
+    swith_tpl_file_op(switched_file)
+  end
+end
+
+function create_tpl_file()
+  local new_tpl_filename = aegisub.dialog.save(
+    "选择创建的文件",
+    "template.txt",
+    bakery.env.config_root,
+    subtitle_group.get_tpl_file_type(),
+    false)
+  if new_tpl_filename ~= nil
+  then
+    swith_tpl_file_op(new_tpl_filename)
+  end
+end
+
+function import_tpl_file()
+  bakery.ui.dialog.warning("将会覆盖目前同名的模板！")
+  local import_filename= aegisub.dialog.open(
+    "选择导入的文件",
+    "template.txt",
+    bakery.env.config_root,
+    subtitle_group.get_tpl_file_type(),
+    false)
+  if import_filename ~= nil
+  then
+    imported_tpls=subtitle_group.load_tpl(import_filename)
+    bakery.utils.merge_table_pairs(group_tpl_table,imported_tpls)
+    modified=true
+  end
+end
+
+function export_tpl_file()
+
+  local export_filename= aegisub.dialog.open(
+    "选择导出的文件",
+    "template.txt",
+    bakery.env.config_root,
+    subtitle_group.get_tpl_file_type(),
+    false)
+  if export_filename ~= nil
+  then
+    names=subtitle_group.get_tpl_names(group_tpl_table)
+    local del_names={}
+
+    for i=1,#names
+    do
+      local del_name={class="checkbox",name=names[i],label=names[i],width=5,height=1}
+      table.insert(del_names,del_name)
+    end
+
+    tpl_sel_grid_layout_host.items[2].items=del_names
+    tpl_sel_grid_layout_host.items[1].label="勾选要导出的模板"
+
+    after_selection=function(result)
+      local export_tpls={}
+      for key,value in pairs(result)
+      do
+        if type(value) == "boolean" and value
+        then
+          export_tpls[key]=group_tpl_table[key]
+        end
+      end
+      subtitle_group.save_tpl(export_filename,export_tpls)
+    end
+
+    bakery.ui.dialog.ok_cancel(tpl_sel_grid_layout_host,
+      after_selection,
+      back_to_main)
+  end
 end
 
 local tpl_export_selection_layout_host={
@@ -263,55 +361,20 @@ local tpl_export_selection_layout_host={
   }
 }
 
+
 function tpl_file_op()
   on_ok=function(result)
     if result.tpl_file_op == "更换模板文件"
     then
-      local names=subtitle_group.get_known_filenames(group_tpl_config)
-      local default=subtitle_group.get_name_from_path(group_tpl_config.current_tpl_file)
-      dropdown=bakery.layout.get_control(tpl_file_list,"tpl_files")
-      dropdown.items=names
-      dropdown.value=default
+      switch_tpl_file()
     elseif result.tpl_file_op == "创建模板文件"
     then
-      local new_tpl_filename = aegisub.dialog.save(
-        "选择创建的文件",
-        "template.txt",
-        bakery.env.config_root,
-        subtitle_group.get_tpl_file_type(),
-        false)
-      if new_tpl_filename ~= nil
-      then
-        swith_tpl_file(new_tpl_filename)
-      end
+      create_tpl_file()
     elseif result.tpl_file_op == "从模板文件导入模板"
     then
-      bakery.ui.dialog.warning("将会覆盖目前同名的模板！")
-      local import_filename= aegisub.dialog.open(
-        "选择导入的文件",
-        "template.txt",
-        bakery.env.config_root,
-        subtitle_group.filetype,
-        false)
-      if import_filename ~= nil
-      then
-        imported_tpls=subtitle_group.load_tpl(import_filename)
-        bakery.utils.merge_table_pairs(group_tpl_table,imported_tpls)
-        modified=true
-      end
+      import_tpl_file()
     else
-      local export_filename= aegisub.dialog.save(
-        "选择导出文件",
-        "template.txt",
-        bakery.env.config_root,
-        subtitle_group.filetype,
-        false)
-      if export_filename ~= nil
-      then
-        imported_tpls=subtitle_group.load_tpl(export_filename)
-        bakery.utils.merge_table_pairs(group_tpl_table,imported_tpls)
-        modified=true
-      end
+      export_tpl_file()
     end
   end
   bakery.ui.dialog.ok_cancel(tpl_file_op_ui,
@@ -375,7 +438,7 @@ function group_tpl_manager_macro(subtitles, selected_lines, active_line)
   group_tpl_config=subtitle_group.load_config()
   group_tpl_table=subtitle_group.load_tpl(group_tpl_config.current_tpl_file)
   sector_identifer=subtitle_group.get_sector_identifer()
-  
+
   group_tpl()
 
   if modified

@@ -52,7 +52,7 @@ local config_version="1.00"
 local tpl_classname="subtitle-group-template"
 local tpl_version="1.00"
 local types={"simple","bilingual"}
-local filetype="txt files (.txt)|.txt"
+local filetype="txt files (*.txt)|*.txt"
 local sector_identifer="*"
 
 local config_filepath=bakery.env.config_root.."group_config.txt"
@@ -85,6 +85,7 @@ end
 subtitle_group.save_config=function(config_table)
   bakery.preference.print_to_file(
     config_filepath,
+    config_table,
     config_classname,
     config_version)
 end

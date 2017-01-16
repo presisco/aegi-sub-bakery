@@ -31,22 +31,30 @@ local log_line=function(text)
   aegisub.log(text.."\n")
 end
 
+local log_err=function(text)
+  aegisub.log(1,text.."\n")
+end
+
+local log_dbg=function(text)
+  aegisub.log(4,text.."\n")
+end
+
 local unwrap_preference = function(wrapped_table,classname,default_version,default_pairs)
   local pref_table={}
   
   if wrapped_table.class ~= nil and wrapped_table.class ~= classname
   then
-    log_line("wrong config file for "..classname.." this is "..wrapped_table.class)
+    log_err("wrong config file for "..classname.." this is "..wrapped_table.class)
     return {}
   end
   
-  log_line("config class:"..classname)
+  log_dbg("config class:"..classname)
   
   if wrapped_table.version ~= nil and wrapped_table.version ~= default_version
   then
-    log_line("unmatched version,need:"..default_version.."this is:"..wrapped_table.version)
+    log_dbg("unmatched version,need:"..default_version.."this is:"..wrapped_table.version)
   else
-    log_line("config version:"..default_version)
+    log_dbg("config version:"..default_version)
   end
   
   local pref_table=wrapped_table.content
@@ -72,7 +80,7 @@ local wrap_preference = function(pref_table,classname,version)
 end
 
 bakery_preference.read_from_file=function(filename,classname,default_version,default_pairs)
-  aegisub.log("opening preference file:"..filename.."\n")
+  log_dbg("opening preference file:"..filename.."\n")
   pref_file,err_msg=io.open(filename,"r")
   if pref_file == nil
   then
@@ -84,7 +92,7 @@ bakery_preference.read_from_file=function(filename,classname,default_version,def
     end
     if pref_file == nil
     then
-      aegisub.log("open failed:"..err_msg.."\n")
+      log_err("open failed:"..err_msg.."\n")
       return {},err_msg
     end
   end
@@ -96,7 +104,7 @@ bakery_preference.read_from_file=function(filename,classname,default_version,def
     table.insert(lines,line)
   end
 
-  aegisub.log("total lines:"..#lines.."\n")
+  log_dbg("total lines:"..#lines.."\n")
 
   pref_file:close()
   
@@ -106,11 +114,11 @@ bakery_preference.read_from_file=function(filename,classname,default_version,def
 end
 
 bakery_preference.print_to_file=function(filename,pref_table,classname,version)
-  aegisub.log("saving preference file:"..filename.."\n")
+  log_dbg("saving preference file:"..filename.."\n")
   pref_file,err_msg=io.open(filename,"w")
   if pref_file == nil
   then
-    aegisub.log("save failed:"..err_msg.."\n")
+    log_err("save failed:"..err_msg.."\n")
     return err_msg
   end
 
