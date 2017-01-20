@@ -23,12 +23,12 @@ local tr = aegisub.gettext
 script_name = tr"在字幕头部添加内容"
 script_description = tr"在字幕头部添加内容"
 script_author = "presisco"
-script_version = "1.20"
-script_modified = "6 January 2017"
+script_version = "1.30"
+script_modified = "20 January 2017"
 line_end = "\\N"
 
 function cook_text(sub,result)
-	new_text = result.tags .. sub.text
+	new_text = result.prefix .. sub.text
 	local new_line = sub
 	new_line.text = new_text
 	return new_line
