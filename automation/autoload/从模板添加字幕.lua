@@ -32,8 +32,8 @@ local tr = aegisub.gettext
 script_name = tr"从模板添加字幕"
 script_description = tr"添加新字幕并套用指定模板"
 script_author = "presisco"
-script_version = "1.00"
-script_modified = "16 January 2017"
+script_version = "1.10"
+script_modified = "2 February 2017"
 
 subs={}
 selections={}
@@ -58,12 +58,9 @@ function add_sub(result)
   for key,value in pairs(selections)
   do
     local new_sub=subs[value+offset]
-    
-    new_sub.layer=tpl.layer
-    new_sub.style=tpl.style
-    new_sub.text=table.concat(subtitle_group.parse_tpl_text(tpl.text))
-    new_sub.actor=tpl.actor
-    new_sub.effect=tpl.effect
+    local new_text=table.concat(subtitle_group.parse_tpl_text(tpl.text))
+    subtitle_group.set_sub_props(new_sub,tpl)
+    new_sub.text=new_text
     
     if result.add_mode == "在所选字幕之后"
     then

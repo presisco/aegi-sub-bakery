@@ -24,12 +24,13 @@ bakery=require "bakery"
 subtitle_group=require "subtitle-group"
 
 local tr = aegisub.gettext
+local layout=bakery.ui.layout
 
 script_name = tr"字幕分组模板管理"
 script_description = tr"对字幕分组模板进行管理"
 script_author = "presisco"
-script_version = "1.00"
-script_modified = "15 January 2017"
+script_version = "1.10"
+script_modified = "2 February 2017"
 
 subs={}
 selections={}
@@ -93,53 +94,6 @@ end
 
 --edit template
 
-local tpl_edit_layout={
-  class="layout",
-  orientation="vertical",
-  items={
-    {
-      class="layout",
-      orientation="horizontal",
-      items={
-        {class="label",label="样式",width=2,height=1},
-        {class="dropdown",name="style",items={},value="",width=8,height=1}
-      }
-    },
-    {
-      class="layout",
-      orientation="horizontal",
-      items={
-        {class="label",label="图层",width=2,height=1},
-        {class="intedit",name="layer",value=0,width=4,height=1}
-      }
-    },
-    {
-      class="layout",
-      orientation="horizontal",
-      items={
-        {class="label",label="添加的文本与标签\n使用*代表一个原文区段\n\\*为一个'*'",width=2,height=1},
-        {class="textbox",name="text",value="",width=12,height=6}
-      }
-    },
-    {
-      class="layout",
-      orientation="horizontal",
-      items={
-        {class="label",label="角色",width=2,height=1},
-        {class="textbox",name="actor",value="",width=12,height=6}
-      }
-    },
-    {
-      class="layout",
-      orientation="horizontal",
-      items={
-        {class="label",label="特效",width=2,height=1},
-        {class="textbox",name="effect",value="",width=12,height=4}
-      }
-    }
-  }
-}
-
 local tpl_list_layout={
   class="layout",
   orientation="horizontal",
@@ -150,31 +104,117 @@ local tpl_list_layout={
 }
 
 function edit_group_tpl(result)
-  local new_group_tpl={
-    style=bakery.utils.trim_illegal_char(result.style),
-    layer=result.layer,
-    text=bakery.utils.trim_illegal_char(result.text),
-    actor=bakery.utils.trim_illegal_char(result.actor),
-    effect=bakery.utils.trim_illegal_char(result.effect),
-  }
+  local new_group_tpl={}
+  if result.have_style
+  then
+    new_group_tpl.style=bakery.utils.trim_illegal_char(result.style)
+  end
+
+  if result.have_layer
+  then
+    new_group_tpl.layer=result.layer
+  end
+
+  if result.have_text
+  then
+    new_group_tpl.text=bakery.utils.trim_illegal_char(result.text)
+  end
+
+  if result.have_actor
+  then
+    new_group_tpl.actor=bakery.utils.trim_illegal_char(result.actor)
+  end
+
+  if result.have_effect
+  then
+    new_group_tpl.effect=bakery.utils.trim_illegal_char(result.effect)
+  end
+
   group_tpl_table[result.name]=new_group_tpl
   modified=true
 end
 
-function update_edit_layout(tpl)
-  bakery.ui.layout.get_control(tpl_edit_layout,"style").value=tpl.style
-  bakery.ui.layout.get_control(tpl_edit_layout,"layer").value=tpl.layer
-  bakery.ui.layout.get_control(tpl_edit_layout,"text").value=tpl.text
-  bakery.ui.layout.get_control(tpl_edit_layout,"actor").value=tpl.actor
-  bakery.ui.layout.get_control(tpl_edit_layout,"effect").value=tpl.effect
+function get_prefilled_edit_layout(tpl)
+  local tpl_edit_layout={
+    class="layout",
+    orientation="vertical",
+    items={
+      {
+        class="layout",
+        orientation="horizontal",
+        items={
+          {class="checkbox",label="使用样式",name="have_style",width=4,height=1},
+          {class="dropdown",name="style",items={},value="",width=8,height=1}
+        }
+      },
+      {
+        class="layout",
+        orientation="horizontal",
+        items={
+          {class="checkbox",label="使用图层",name="have_layer",width=4,height=1},
+          {class="intedit",name="layer",value=0,width=4,height=1}
+        }
+      },
+      {
+        class="layout",
+        orientation="horizontal",
+        items={
+          {class="checkbox",label="使用文本,添加的文本与标签\n使用*代表一个原文区段\n\\*为一个'*'",name="have_text",width=6,height=3},
+          {class="textbox",name="text",value="",width=12,height=6}
+        }
+      },
+      {
+        class="layout",
+        orientation="horizontal",
+        items={
+          {class="checkbox",label="使用角色",name="have_actor",width=4,height=1},
+          {class="textbox",name="actor",value="",width=12,height=6}
+        }
+      },
+      {
+        class="layout",
+        orientation="horizontal",
+        items={
+          {class="checkbox",label="使用特效",name="have_effect",width=4,height=1},
+          {class="textbox",name="effect",value="",width=12,height=6}
+        }
+      }
+    }
+  }
+
+  if tpl == nil
+  then
+    tpl={name="default"}
+  end
+
+  local append_checkbox_data=function(key)
+    if tpl[key] ~= nil
+    then
+      tpl["have_"..key]=true
+    end
+  end
+
+  append_checkbox_data("style")
+  append_checkbox_data("layer")
+  append_checkbox_data("text")
+  append_checkbox_data("actor")
+  append_checkbox_data("effect")
+
+  style_ctrl=layout.get_control(tpl_edit_layout,"style")
+  style_ctrl.items=style_names
+  style_ctrl.value=style_names[1]
+  layout.set_items_value(tpl_edit_layout,tpl)
+
+  return tpl_edit_layout
 end
 
 function edit()
+
   after_selection=function(result)
+
     selected_template=result.template
-    tpl=group_tpl_table[selected_template]
-    update_edit_layout(tpl)
-    bakery.ui.dialog.ok_cancel(tpl_edit_layout,
+    local tpl=group_tpl_table[selected_template]
+    bakery.ui.dialog.ok_cancel(get_prefilled_edit_layout(tpl),
       function(result)
         result["name"]=selected_template
         edit_group_tpl(result)
@@ -182,8 +222,8 @@ function edit()
       back_to_main)
   end
   names=subtitle_group.get_tpl_names(group_tpl_table)
-  bakery.ui.layout.get_control(tpl_list_layout,"template").items=names
-  bakery.ui.layout.get_control(tpl_list_layout,"template").value=names[1]
+  layout.get_control(tpl_list_layout,"template").items=names
+  layout.get_control(tpl_list_layout,"template").value=names[1]
 
   bakery.ui.dialog.ok_cancel(tpl_list_layout,
     after_selection,
@@ -192,23 +232,7 @@ end
 
 --add template
 
-local tpl_name_layout={
-  class="layout",
-  orientation="horizontal",
-  items={
-    {class="label",label="名称",width=2,height=1},
-    {class="textbox",name="name",value="",width=8,height=1}
-  }
-}
 
-local tpl_add_layout={
-  class="layout",
-  orientation="vertical",
-  items={
-    tpl_name_layout,
-    tpl_edit_layout
-  }
-}
 
 function generate()
   selected_sub=subs[selections[1]]
@@ -217,8 +241,25 @@ function generate()
     layer=selected_sub.layer,
     text=selected_sub.text,
     actor=selected_sub.actor,
-    effect=selected_sub.effect}
-  update_edit_layout(tpl)
+    effect=selected_sub.effect
+  }
+
+  local tpl_add_layout={
+    class="layout",
+    orientation="vertical",
+    items={
+      {
+        class="layout",
+        orientation="horizontal",
+        items={
+          {class="label",label="名称",width=2,height=1},
+          {class="textbox",name="name",value="",width=8,height=1}
+        }
+      },
+      get_prefilled_edit_layout(tpl)
+    }
+  }
+
   bakery.ui.dialog.ok_cancel(tpl_add_layout,
     edit_group_tpl,
     back_to_main)
@@ -235,23 +276,6 @@ local tpl_file_op_ui={
   }
 }
 
---[[
-local tpl_file_list={
-  class="layout",
-  type="linear",
-  orientation="vertical",
-  items={
-    {class="layout",
-      orientation="horizontal",
-      items={
-        {class="label",label="选择已知的模板文件",width=4,height=1},
-        {class="dropdown",name="tpl_files",items={},value="",width=10,height=1}}
-    },
-    {class="checkbox",name="add_tpl_file",label="添加模板文件",width=4,height=1}
-  }
-}
-]]
-
 function swith_tpl_file_op(new_filepath)
   subtitle_group.save_tpl(group_tpl_config.current_tpl_file
     ,group_tpl_table)
@@ -265,19 +289,19 @@ function swith_tpl_file_op(new_filepath)
 end
 
 function switch_tpl_file()
-  
+
   local current_file=group_tpl_config.current_tpl_file
   local name=bakery.utils.get_filename_from_path(current_file)
   local path=bakery.utils.get_full_path(current_file)
---  aegisub.log("name:"..name..",path:"..path.."\n")
-  
+  --  aegisub.log("name:"..name..",path:"..path.."\n")
+
   local switched_file= aegisub.dialog.open(
     "选择导入的文件",
     name,
     path,
     subtitle_group.get_tpl_file_type(),
     false)
-  
+
   if switched_file ~= nil
   then
     swith_tpl_file_op(switched_file)
@@ -437,8 +461,6 @@ function group_tpl_manager_macro(subtitles, selected_lines, active_line)
   active=active_line
 
   style_names=bakery.utils.get_style_names(subs)
-
-  bakery.ui.layout.get_control(tpl_edit_layout,"style").items=style_names
 
   group_tpl_config=subtitle_group.load_config()
   group_tpl_table=subtitle_group.load_tpl(group_tpl_config.current_tpl_file)

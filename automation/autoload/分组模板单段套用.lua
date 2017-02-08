@@ -27,8 +27,8 @@ local tr = aegisub.gettext
 script_name = tr"分组模板单段套用"
 script_description = tr"对单段分组模板套用字幕（一个*）"
 script_author = "presisco"
-script_version = "1.00"
-script_modified = "16 January 2017"
+script_version = "1.10"
+script_modified = "2 February 2017"
 
 subs={}
 selections={}
@@ -53,11 +53,9 @@ function scan_subs(result)
   for key,value in pairs(selections)
   do
     local mod_sub=subs[value]
-    mod_sub.layer=tpl.layer
-    mod_sub.style=tpl.style
-    mod_sub.text=cook_text(mod_sub.text,subtitle_group.parse_tpl_text(tpl.text),result)
-    mod_sub.actor=tpl.actor
-    mod_sub.effect=tpl.effect
+    local mod_text=cook_text(mod_sub.text,subtitle_group.parse_tpl_text(tpl.text),result)
+    subtitle_group.set_sub_props(mod_sub,tpl)
+    mod_sub.text=mod_text
     subs[value]=mod_sub
   end
 end

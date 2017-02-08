@@ -54,6 +54,7 @@ local tpl_version="1.00"
 local types={"simple","bilingual"}
 local filetype="txt files (*.txt)|*.txt"
 local sector_identifer="*"
+local group_tpl_prop_keys={"layer","style","actor","text","effect"}
 
 local config_filepath=bakery.env.config_root.."group_config.txt"
 local default_tpl_filepath=bakery.env.config_root.."group_tpl.txt"
@@ -128,6 +129,10 @@ subtitle_group.get_name_from_path=function(filepath)
   return filepath:gsub("(.*)\\","")
 end
 
+subtitle_group.get_group_tpl_prop_keys=function()
+  return group_tpl_prop_keys
+end
+
 subtitle_group.parse_tpl_text=function(text)
   local length=text:len()
   local sectors={}
@@ -160,6 +165,13 @@ subtitle_group.parse_tpl_text=function(text)
   table.insert(sectors,buff)
   
   return sectors
+end
+
+subtitle_group.set_sub_props=function(sub,tpl)
+  for prop_name,prop_value in pairs(tpl)
+  do
+    sub[prop_name]=prop_value
+  end
 end
 
 return subtitle_group
