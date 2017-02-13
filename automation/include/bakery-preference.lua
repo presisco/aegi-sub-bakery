@@ -130,6 +130,7 @@ bakery_preference.print_to_file=function(filename,pref_table,classname,version)
 
   bakery_utils.print_table_itr(print_func,0,wrapped_table)
 
+  pref_file:write("end of file!\n")
   pref_file:flush()
   pref_file:close()
 
